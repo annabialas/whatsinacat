@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HW API Bialas</title>
+    <link rel="shortcut icon" href="http://pngimg.com/upload/cat_PNG100.png"/>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<div id="input">
+    <h4><em>WHAT'S IN A CAT?</em></h4>
+    <form action="https://api.cognitive.microsoft.com/bing/v5.0/images/search" method="get">
+        <!-- <input type="text" name="q" id="q"> -->
+        <input type="hidden" name="Ocp-Apim-Subscription-Key" value="60c2a5e5f3974109b7d7e727749c427e">
+        <input type="hidden" name="mode" value="html">
+        <input type="submit" value="Find Out!" class="button">
+    </form>
+</div>
+
+<div id="output">
+    <!-- Animated SVG from http://loading.io/ -->
+    <div id="loading"><img src="img/ellipsis.svg" style="width:32px;height:32px;"></div>
+</div>
+
+ <footer>
+     <p><em>Titles of orange cats images accessed through the Bing Image Search API.</em></p> 
+     <p><em>by Anna Bialas for Dynamic Web Apps w/ Jason Sigal.</em></p>
+ </footer>
+
+<!-- Leaving JS code below so it's easier to access through Google Dev Tools -->
+
+<script type="text/javascript">
+
+    $('form').on('submit', handleSubmit);
+
+    // Showing a loading element while waiting for the callback function learned via:
+    // http://stackoverflow.com/questions/4684722/show-loading-image-while-ajax-is-performed
+    $(document).ajaxStart(function() {
+        $("#loading").show();
+        $("#text").hide();
+    });
+
+    $(document).ajaxStop(function() {
+        $("#loading").hide();
+    });
+
+    function handleSubmit(event){
+        //Prevents leaving the page
+        event.preventDefault();
+
+        var params = {
+           q: "orange cat",
+           modulesRequested: "All",
+           count: "150",
+           // Ask Jason: 
+           // insightsToken: "ccid_Pstp2kXT*mid_F030C73B176650BC07670A4864AA27B8B0E74729*simid_608048193523286990"
+
+        };
+
+        // Data from Bing Image Search API:
+        // https://www.microsoft.com/cognitive-services/en-us/bing-image-search-api
+        $.ajax({
+            url: "https://api.cognitive.microsoft.com/bing/v5.0/images/search?" + $.param(params),
+            beforeSend: function(xhrObj){
+                // Requests headers
+                xhrObj.setRequestHeader("Content-Type","multipart/form-data");
+                xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key","60c2a5e5f3974109b7d7e727749c427e");
+            },
+            type: "GET",
+        })
+
+        .done(gotData)
+        .fail(handleError)
+
+    }
+
+    function gotData(data){
+
+        var title = data.value[Math.floor(Math.random()*150)].name;
+
+        var parent = document.getElementById("output");
+
+        var element = document.getElementById("text");
+
+        if (element){
+            element.parentNode.removeChild(element);
+        }
+
+        var newElement = document.createElement("p");
+        newElement.setAttribute("id", "text");
+        newElement.innerHTML = title;
+        parent.appendChild(newElement);  
+        
+        console.log(title);
+
+        // Re: Ask Jason:
+        // console.log(data.imageCaption.caption);
+    }
+
+    function handleError(err){
+        console.log("error", err)
+    }
+    
+</script>
+</body>
+</html>
